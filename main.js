@@ -3,6 +3,8 @@ import Quill from 'quill';
 
 import 'quill/dist/quill.snow.css';
 
+import { fabric } from 'fabric';
+
 var array = JSON.parse(localStorage.getItem('localArray')) || [{
    id: "1",
    date: '11 May 2022',

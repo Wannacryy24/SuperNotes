@@ -5,6 +5,9 @@ import 'quill/dist/quill.snow.css';
 
 import { fabric } from 'fabric';
 
+
+
+
 var array = JSON.parse(localStorage.getItem('localArray')) || [{
    id: "1",
    date: '11 May 2022',
@@ -30,93 +33,97 @@ var array = JSON.parse(localStorage.getItem('localArray')) || [{
    content: 'Science has traditionally been viewed as the domain of professionals in laboratories and universities. However, a new era is dawning, driven by the rise of citizen science. This movement empowers ordinary people to participate in scientific research, contributing valuable data and fostering a deeper understanding of the world around us.Citizen science projects come in all shapes and sizes. From tracking bird migrations and monitoring air quality to classifying galaxies and identifying species in underwater photographs, these projects allow anyone with an internet connection and a curious mind to contribute.  The key here is the sheer scale of participation. By harnessing the collective power of citizen scientists, researchers can gather vast amounts of data that would be impossible to collect through traditional methods. Citizen science isnt just about data collection; its also about democratizing discovery.  By engaging directly in the scientific process, participants gain a deeper appreciation for the scientific method and the challenges and rewards of research. They develop critical thinking skills, learn to analyze data, and become more informed about the scientific issues impacting their communities.'
 }
 ];
+var currentNote = null;
 
 function saveArraytoStorage() {
-var jsonArray = JSON.stringify(array);
-localStorage.setItem('localArray', jsonArray);
+// var jsonArray = JSON.stringify(array);
+// localStorage.setItem('localArray', jsonArray);
 }
+
+
 var containerDiv = document.createElement('div');
 containerDiv.setAttribute('id', 'containerDiv');
 document.body.appendChild(containerDiv);
 
 function leftSideDiv() {
-var div1 = document.createElement('div');
-div1.setAttribute('id', 'sideDiv');
-containerDiv.appendChild(div1);
-var button1 = document.createElement('button');
-button1.id = "plusButton";
-button1.innerHTML = `<i class="fa-solid fa-plus"></i>`
-div1.appendChild(button1);
-
-
-var penButton = document.createElement('button');
-div1.appendChild(penButton);
-penButton.id = "penButton";
-penButton.innerHTML = `<i class="fa-solid fa-pencil"></i>`
-
-penButton.addEventListener('click', function () {
-
-   var date = new Date()
-   var day = date.getDate()
-   var month = date.toLocaleString('en-US', {
-      month: 'long'
+   var div1 = document.createElement('div');
+   div1.setAttribute('id', 'sideDiv');
+   containerDiv.appendChild(div1);
+   var addDiv = document.createElement('button');
+   addDiv.id = "plusButton";
+   addDiv.innerHTML = `<i class="fa-solid fa-plus"></i>`
+   div1.appendChild(addDiv);
+   addDiv.addEventListener('click', function (event) {
+      creatAndAppendNewBox(event);
    });
-   var year = date.getFullYear();
-   var fulldate = `${day} ${month} ${year}`;
 
-   var newObj = {
-      id: array.length + 1,
-      date: fulldate,
-      title: "Drawing Title",
-      content: "",
-      typeof: "drawing"
-   };
 
-   array.unshift(newObj);
-   console.log(array);
+   var penButton = document.createElement('button');
+   div1.appendChild(penButton);
+   penButton.id = "penButton";
+   penButton.innerHTML = `<i class="fa-solid fa-pencil"></i>`
 
-   createObjectDiv(array);
-   saveArraytoStorage();
-   showMore(array, 0);
+   penButton.addEventListener('click', function () {
 
-})
+      var date = new Date()
+      var day = date.getDate()
+      var month = date.toLocaleString('en-US', {
+         month: 'long'
+      });
+      var year = date.getFullYear();
+      var fulldate = `${day} ${month} ${year}`;
 
-var toDoButton = document.createElement('button');
-div1.appendChild(toDoButton);
-toDoButton.id = "addressButton";
-toDoButton.innerHTML = `<i class="fa-solid fa-list"></i>`
-toDoButton.addEventListener('click', function (event) {
-   var date = new Date()
-   var day = date.getDate()
-   var month = date.toLocaleString('en-US', {
-      month: 'long'
-   });
-   var year = date.getFullYear();
-   var fulldate = `${day} ${month} ${year}`;
+      var newObj = {
+         id: array.length + 1,
+         date: fulldate,
+         title: "Drawing Title",
+         content: "",
+         typeof: "drawing"
+      };
 
-   var newObj = {
-      id: (array.length + 1).toString(),
-      date: fulldate,
-      title: "Add Title",
-      content: "<ul><li></li></ul>"
-   };
-   array.unshift(newObj);
-   createObjectDiv(array);
-   saveArraytoStorage();
-   showMore(array, 0);
-})
+      array.unshift(newObj);
+      console.log(array);
 
-var locationButton = document.createElement('button');
-div1.appendChild(locationButton);
-locationButton.id = "locationButton";
-locationButton.innerHTML = `<i class="fa-solid fa-location-dot"></i>`
-locationButton.addEventListener('click', function () {
-   getLocationLatitudeAndLongitude()
-})
+      renderDataInMiddle(array);
+      saveArraytoStorage();
+      renderInRight(array, 0);
 
-button1.addEventListener('click', function (event) {
-   creatAndAppendNewBox(event);
-});
+   })
+
+   var toDoButton = document.createElement('button');
+   div1.appendChild(toDoButton);
+   toDoButton.id = "addressButton";
+   toDoButton.innerHTML = `<i class="fa-solid fa-list"></i>`
+   toDoButton.addEventListener('click', function (event) {
+      var date = new Date()
+      var day = date.getDate()
+      var month = date.toLocaleString('en-US', {
+         month: 'long'
+      });
+      var year = date.getFullYear();
+      var fulldate = `${day} ${month} ${year}`;
+
+      var newObj = {
+         id: (array.length + 1).toString(),
+         date: fulldate,
+         title: "Add Title",
+         content: "<ul><li></li></ul>"
+      };
+      array.unshift(newObj);
+      renderDataInMiddle(array);
+      saveArraytoStorage();
+      renderInRight(array, 0);
+   })
+
+   var locationButton = document.createElement('button');
+   div1.appendChild(locationButton);
+   locationButton.id = "locationButton";
+   locationButton.innerHTML = `<i class="fa-solid fa-location-dot"></i>`
+   locationButton.addEventListener('click', function () {
+      getLocationLatitudeAndLongitude()
+   })
+
+
 }
 leftSideDiv();
 
@@ -140,7 +147,7 @@ rightDivCreated();
 
 
 //Middle Div
-function createObjectDiv(array) {
+function renderDataInMiddle(array,index) {
 sortArrayByDate();
 
 var objMainDiv = document.getElementById("objMainDiv");
@@ -149,6 +156,7 @@ objMainDiv.innerHTML = '';
 var contentHtml = array.map(function (item) {
    if (item.typeof === 'drawing') {
        return `<div class="smallBoxOfObject">
+                     <button class='delete-button' data-id='${item.id}'>x</button>
                      <li>${item.date}</li>
                      <h3>${item.title}</h3>
                      <img ${item.content}</img>
@@ -157,6 +165,7 @@ var contentHtml = array.map(function (item) {
        else
        {
            return `<div class="smallBoxOfObject">
+                     <button class='delete-button' data-id='${item.id}'>x</button>
                      <li>${item.date}</li>
                      <h3>${item.title}</h3>
                      <p>${item.content.slice(0, 350)}</p>
@@ -169,147 +178,122 @@ objMainDiv.innerHTML = contentHtml;
 var smallBoxOfObjects = document.querySelectorAll('.smallBoxOfObject');
 smallBoxOfObjects.forEach(function (box, index) {
    box.addEventListener('click', function () {
-      showMore(array, index);
+      renderInRight(array, index);
       saveArraytoStorage();
    });
 });
+deleteWholeDiv(index);
+// deleteDiv();
 }
 
-function showMore(data, index) {
-rightDiv.innerHTML = "";
-var contentDiv = document.createElement('div');
-contentDiv.classList.add('contentDiv');
-contentDiv.setAttribute('id', 'editor');
-rightDiv.appendChild(contentDiv);
+function renderInRight(array, index) {
 
-var date = document.createElement('li');
-date.textContent = data[index].date;
-date.setAttribute('class', 'date');
-contentDiv.appendChild(date);
+   // currentNote = array;
+   rightDiv.innerHTML = "";
+   var contentDiv = document.createElement('div');
+   contentDiv.classList.add('contentDiv');
+   contentDiv.setAttribute('id', 'editor');
+   rightDiv.appendChild(contentDiv);
 
-var title = document.createElement('h3');
-title.classList.add('edit-title');
-title.textContent = data[index].title;
-title.setAttribute("contentEditable", "true");
-contentDiv.appendChild(title);
-title.addEventListener('input', function (event) {
-   contentEditable(event, index);
-});
+   var date = document.createElement('li');
+   date.textContent = array[index].date;
+   date.setAttribute('class', 'date');
+   contentDiv.appendChild(date);
 
-if (data[index].typeof === 'drawing') {
-   var drawingDiv = document.createElement('div');
-   drawingDiv.classList.add('drawing-canvas');
-   drawingDiv.innerHTML = `<canvas id="canvas" ></canvas>`;
-   contentDiv.appendChild(drawingDiv);
-
-   var canvas = new fabric.Canvas('canvas', {
-      isDrawingMode: true
-   });
-
-   if (data[index].content.includes('<img')) {
-      var imgSrc = data[index].content.match(/src="([^"]+)"/)[1];
-      fabric.Image.fromURL(imgSrc, function (img) {
-         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-      });
-   }
-   canvas.on('object:modified', function () {
-       autoSaveDrawing(canvas);
-   });
-   canvas.on('path:created', function () {
-       autoSaveDrawing(canvas);
-   });
-
-   function autoSaveDrawing(canvas) {
-       var drawingData = canvas.toDataURL('image/png');
-       data[index].content = `<img src="${drawingData}" />`;
-       
-       saveArraytoStorage();
-       createObjectDiv(array);
-       showMore(data,index);
-
-   }
-
-  
-   var eraseButton = document.createElement('button');
-   eraseButton.classList.add('eraseButton');
-   eraseButton.textContent = 'Erase';
-   contentDiv.appendChild(eraseButton);
-
-   eraseButton.addEventListener('click', function () {
-     canvas.clear();
-     array[index].content = '';
-     for (let i = 0; i < array.length; i++) {
-         if (array[i].id === array.id) {
-             array[i].content = '';
-         }
-     }
-     createObjectDiv(array);
-     saveArraytoStorage();
-     // showMore(array , index) 
-   });
-
-   function toggleEraseMode(canvas) {
-       var isDrawingMode = canvas.isDrawingMode;
-       canvas.isDrawingMode = !isDrawingMode; 
-   
-       if (!isDrawingMode) {
-           
-           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-           canvas.freeDrawingBrush.color = '#ffffff';
-           canvas.freeDrawingBrush.width = 10;
-       } else {
-           
-           canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-           canvas.freeDrawingBrush.color = '#000000'; 
-           canvas.freeDrawingBrush.width = 1;
-       }
-   }
-   
-   
-   
-     
-   
-
-} else {
-   var content = document.createElement('p');
-   content.innerHTML = data[index].content;
-   content.classList.add('edit-content');
-   content.setAttribute("contentEditable", "true");
-   contentDiv.appendChild(content);
-   content.addEventListener('input', function (event) {
+   var title = document.createElement('h3');
+   title.classList.add('edit-title');
+   title.textContent = array[index].title;
+   title.setAttribute("contentEditable", "true");
+   contentDiv.appendChild(title);
+   title.addEventListener('input', function (event) {
       contentEditable(event, index);
    });
 
-   var quill = new Quill('.edit-content', {
-      theme: 'snow'
-   });
-   quill.on('text-change', function () {
-      data[index].content = quill.root.innerHTML;
+   if (array[index].typeof === 'drawing') {
+      var drawingDiv = document.createElement('div');
+      drawingDiv.classList.add('drawing-canvas');
+      drawingDiv.innerHTML = `<canvas id="canvas" ></canvas>`;
+      contentDiv.appendChild(drawingDiv);
+
+      var canvas = new fabric.Canvas('canvas', {
+         isDrawingMode: true
+      });
+
+      if (array[index].content.includes('<img')) {
+         var imgSrc = array[index].content.match(/src="([^"]+)"/)[1];
+         fabric.Image.fromURL(imgSrc, function (img) {
+            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+         });
+      }
+      canvas.on('object:modified', function () {
+         autoSaveDrawing(canvas);
+      });
+      canvas.on('path:created', function () {
+         autoSaveDrawing(canvas);
+      });
+
+      function autoSaveDrawing(canvas) {
+         var drawingData = canvas.toDataURL('image/png');
+         array[index].content = `<img src="${drawingData}" />`;
+         
+         saveArraytoStorage();
+         renderDataInMiddle(array);
+         renderInRight(array,index);
+      }
+
+   
+      var eraseButton = document.createElement('button');
+      eraseButton.classList.add('eraseButton');
+      eraseButton.textContent = 'Erase';
+      contentDiv.appendChild(eraseButton);
+
+      eraseButton.addEventListener('click', function () {
+      canvas.clear();
+      array[index].content = '';
+      for (let i = 0; i < array.length; i++) {
+            if (array[i].id === array.id) {
+               array[i].content = '';
+            }
+      }
+      renderDataInMiddle(array);
       saveArraytoStorage();
-      createObjectDiv(array);
-   });
-}
+      // renderInRight(array , index) 
+      });
+   } 
+   else 
+   {
+      var content = document.createElement('p');
+      content.innerHTML = array[index].content;
+      content.classList.add('edit-content');
+      content.setAttribute("contentEditable", "true");
+      contentDiv.appendChild(content);
+      content.addEventListener('input', function (event) {
+         contentEditable(event, index);
+      });
 
-var smallBoxOfObjects = document.querySelectorAll(".smallBoxOfObject");
-smallBoxOfObjects.forEach(function (box, i) {
-   if (i === index) {
-      box.classList.add("selected");
-   } else {
-      box.classList.remove("selected");
+      var quill = new Quill('.edit-content', {
+         theme: 'snow'
+      });
+      quill.on('text-change', function () {
+         array[index].content = quill.root.innerHTML;
+         saveArraytoStorage();
+         renderDataInMiddle(array);
+      });
    }
-});
 
-
-
+   var smallBoxOfObjects = document.querySelectorAll(".smallBoxOfObject");
+   smallBoxOfObjects.forEach(function (box, i) {
+      if (i === index) {
+         box.classList.add("selected");
+      } else {
+         box.classList.remove("selected");
+      }
+   });
 }
 
 
 function contentEditable(event, index) {
-event.stopPropagation();
-var clickedElement = event.currentTarget;
-clickedElement.addEventListener('input', function (event) {
-
-
+   event.stopPropagation();
    var editedElement = event.target;
    var date = new Date()
    var day = date.getDate()
@@ -319,7 +303,6 @@ clickedElement.addEventListener('input', function (event) {
    var year = date.getFullYear();
    var fulldate = `${day} ${month} ${year}`;
    array[index].date = fulldate;
-   // console.log(array[index]);
    var dateShowMore = document.querySelector('.date');
    dateShowMore.textContent = fulldate;
    var editedTextContent = editedElement.textContent;
@@ -327,16 +310,14 @@ clickedElement.addEventListener('input', function (event) {
    if (editedElement.classList.contains('edit-title')) {
 
       array[index].title = editedTextContent;
-
-
+      console.log(array[index]);
    } else if (editedElement.classList.contains('edit-content')) {
 
       array[index].content = editedTextContent;
-
+      // console.log(array[index]);
    }
    saveArraytoStorage();
-   createObjectDiv(array);
-})
+   renderDataInMiddle(array);
 }
 
 
@@ -356,13 +337,13 @@ var newObj = {
 };
 
 array.unshift(newObj);
-createObjectDiv(array);
+renderDataInMiddle(array);
 saveArraytoStorage();
-showMore(array, 0);
+renderInRight(array, 0);
 }
 
-createObjectDiv(array);
-showMore(array, 0);
+renderDataInMiddle(array);
+renderInRight(array, 0);
 
 
 function getLocationLatitudeAndLongitude() {
@@ -406,3 +387,52 @@ array.sort(function (a, b) {
 });
 }
 
+
+function deleteWholeDiv(index) {
+    var deleteButton = document.querySelectorAll('.delete-button');
+    deleteButton.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const ids = button.getAttribute('data-id');
+            const id = parseInt(ids);
+
+            // Find the index of the note to be deleted
+            const noteIndex = array.findIndex(note => note.id === ids);
+            
+            // Remove the note from the array
+            array.splice(noteIndex, 1);
+
+            
+            renderDataInMiddle(array);
+
+            // If there are remaining notes, render the first note in the right div
+            if (array.length > 0) {
+                renderInRight(array, 0);
+            } else {
+                
+                rightDiv.innerHTML = '';
+            }
+        })
+    })
+}
+
+
+// function deleteDiv(){
+//    var deleteButton = document.querySelectorAll('.delete-button');
+//    deleteButton.forEach(function(button){
+//       button.addEventListener('click',function(event){
+//          event.stopPropagation();
+//          const ids = button.getAttribute('data-id');
+//          const id= parseInt(ids);
+         
+//          array.splice(id,1);
+         
+//          renderDataInMiddle(array);
+//          if (array.length > 0) {
+//             renderInRight(array, 0);
+//         } else {
+//             rightDiv.innerHTML = '';
+//         }
+//       })
+//    })
+// }

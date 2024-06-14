@@ -183,7 +183,7 @@ function renderDataInMiddle(data) {
       deleteNoteById(id);
     });
   });
-
+}
 function renderInRight(note) {
   selectedNote = note;
   var rightDiv = document.getElementById("rightDiv");

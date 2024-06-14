@@ -1,86 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 </head>
 <body>
-    <script>
-        import './style.css'
-import Quill from 'quill';
-import 'quill/dist/quill.snow.css';
-import { fabric } from 'fabric';
-
-var jobDetails = JSON.parse(localStorage.getItem('jobDetails')) || [
-  { id: "1", date: '01 January  2024', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "2", date: '01 Febuary 2024', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "3", date: '01 March 2024', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "4", date: '01 April', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "5", date: '01 May', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "6", date: '01 June', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' },
-
-  { id: "7", date: '01 July', title: 'Job interview preparations', description: 'Your success in a job interview depends a great deal on how you prepare for it. Interview preparation primarily involves researching the job and the company and thoughtfully considering your answers to the interview question' }
-
-]
-var container = document.createElement('div')
-container.className = "container"
-
-var leftDiv = document.createElement('div')//leftdiv 
-leftDiv.className = "left-div"
-container.appendChild(leftDiv)
-
-var centerDiv = document.createElement('div')//centerdiv
-centerDiv.className = "center-div"
-container.appendChild(centerDiv)
-
-var rightDiv = document.createElement('div')//rightdiv 
-rightDiv.className = "right-div"
-container.appendChild(rightDiv)
-
-var addButton1 = document.createElement('button')
-addButton1.className = "add-btn"
-addButton1.innerHTML = '<i class="fa-solid fa-plus"></i>'
-leftDiv.appendChild(addButton1)
-
-var button2 = document.createElement('button')
-button2.className = "btn2"
-button2.innerHTML = '<i class="fa-solid fa-check"></i>'
-leftDiv.appendChild(button2)
-
-var button3 = document.createElement('button')
-button3.className = "btn3"
-button3.innerHTML = '<i class="fa-solid fa-pencil"></i>'
-leftDiv.appendChild(button3)
-
-var button4 = document.createElement('button')
-button4.className = "btn4"
-button4.innerHTML = '<i class="fa-regular fa-note-sticky"></i>'
-leftDiv.appendChild(button4)
-
-var shareButton = document.createElement('button')
-shareButton.className = "btn5"
-shareButton.innerHTML = '<i class="fa-solid fa-share-nodes"></i>'
-leftDiv.appendChild(shareButton)
-
-document.body.appendChild(container)
-
-function sortJobDetailsByDate() {
-  jobDetails.sort(function(a, b){
-    return new Date(a.date) + new Date(b.date);
-  });
-}
+  <script>
 
 // renderdata
 function renderData() {
   sortJobDetailsByDate()
   var content = jobDetails.map(function (item) {
-    return `<div class= "inner-div" ${item.id}> 
+    return `<div class= "inner-div"> 
           <h3>${item.date}</h3>
           <h4>${item.title}</h4>
           <p>${item.description}</p>
@@ -100,7 +32,7 @@ renderData()
 
 // render data in rightDiv 
 function renderDataRightDiv(jobDetails, index) {
-  var dataindex = rightDiv.setAttribute('data-index', index)
+  var dataindex = rightDiv.setAttribute('data-index' , index)
   rightDiv.innerHTML = ""
 
   var headingdiv = document.createElement('h3')
@@ -119,10 +51,6 @@ function renderDataRightDiv(jobDetails, index) {
   rightDiv.appendChild(titleDiv) 
 
   if (jobDetails[index].type === 'drawing') {
-    // var saveButton = document.createElement('button')
-    // saveButton.textContent = "Save" 
-    // saveButton.id = "save-btn"
-    // rightDiv.appendChild(saveButton)
 
     var canvasDiv = document.createElement('div')
     canvasDiv.className = "canvas-div"
@@ -165,15 +93,6 @@ function renderDataRightDiv(jobDetails, index) {
       saveToLocalStorage();
       renderData(jobDetails); 
     });
-    //
-    // saveButton.addEventListener('click', function () {
-    //     var dataUrl = canvas.toDataURL('image/png')
-    //     var index = rightDiv.getAttribute('data-index')
-    //     jobDetails[index].description = <img src="${dataUrl}"/>
-    //     saveToLocalStorage()
-    //     renderData()
-    //     renderDataRightDiv(jobDetails, index)
-    // })
 
   } else {
     //  add quill editor
@@ -196,52 +115,18 @@ function renderDataRightDiv(jobDetails, index) {
 }
 
 function changeData() {
-  var index = rightDiv.getAttribute('data-index')
+  var index = rightDiv.getAttribute('data-index');
   var headingdiv = rightDiv.querySelector('h3')
   var titleDiv = rightDiv.querySelector('h4')
   var descriptionDiv = rightDiv.querySelector('p')
 
   jobDetails[index].date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  jobDetails[index].title = titleDiv.textContent
-  jobDetails[index].description = descriptionDiv.textContent
-  saveToLocalStorage()
-  renderData()
+  jobDetails[index].title = titleDiv.textContent;
+  jobDetails[index].description = descriptionDiv.textContent;
+  saveToLocalStorage();
+  renderData();
 }
-// addButton
-addButton1.addEventListener('click', function () {
-  var date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  var newObject = { date: date, title: 'Title..', description: 'Description...' }
-  jobDetails.unshift(newObject)
-  saveToLocalStorage()
-  renderData()
-  renderDataRightDiv(jobDetails, 0) 
-})
-// task button
-button2.addEventListener('click', function () {
-  var date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  var newObject = { date: date, title: 'Title..', description: 'to do: <ul><li></li></ul>'}
-  jobDetails.unshift(newObject)
-  saveToLocalStorage()
-  renderData()
-  renderDataRightDiv(jobDetails, 0) 
-})
-renderDataRightDiv(jobDetails, 0)
 
-function scriblebtn() {
-  rightDiv.innerHTML = ""
-  var date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  var newObject = { date: date, title: 'Title..', description: 'Description...', type: 'drawing' }
-  jobDetails.unshift(newObject)
-  saveToLocalStorage()
-  renderData()
-  renderDataRightDiv(jobDetails, 0)
-}
-button3.addEventListener('click', scriblebtn)
-// localStorage
-function saveToLocalStorage() {
-  localStorage.setItem('jobDetails', JSON.stringify(jobDetails));
-} 
-
-    </script>
+</script>
 </body>
 </html>

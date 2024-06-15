@@ -169,8 +169,10 @@ function renderDataInMiddle(data) {
     box.addEventListener("click", function () {
       const id = box.getAttribute("data-id");
       const note = data.find(function (item) 
-      {item.id == id} 
+      {
+        return item.id === id} 
       );
+      console.log(note);
       renderInRight(note);
       saveArraytoStorage();
     });
@@ -180,6 +182,7 @@ function renderDataInMiddle(data) {
     button.addEventListener("click", function (event) {
       event.stopPropagation();
       const id = button.getAttribute("data-id");
+      
       deleteNoteById(id);
     });
   });
@@ -290,24 +293,31 @@ function renderInRight(note) {
     }
   });
 }
+
+
+
+function findNoteByID(id){
+  return notesArray.find(function(note){
+    return note.id ===id
+  })
+}
+
 function contentEditable(event, id) {
   event.stopPropagation();
+  var note = findNoteByID(id);
+  if(!note){
+    console.log('not found');
+    return
+  }
   var editedElement = event.target;
-  var note = notesArray.find(function (item) {
-    item.id == id;
-  });
-
-  var date = new Date();
-  var day = date.getDate();
-  var month = date.toLocaleString("en-US", {
+  
+  note.date = new Date().toLocaleString("en-US", {
+    day: "numeric",
     month: "long",
+    year: "numeric",
   });
-  var year = date.getFullYear();
-  var fulldate = `${day} ${month} ${year}`;
-
-  note.date = fulldate;
   var dateShowMore = document.querySelector(".date");
-  dateShowMore.textContent = fulldate;
+  dateShowMore.textContent = note.date;
   var editedTextContent = editedElement.textContent;
 
   if (editedElement.classList.contains("edit-title")) {
@@ -323,21 +333,19 @@ function contentEditable(event, id) {
 function creatAndAppendNewBox() {
   var date = new Date();
   var day = date.getDate();
-  var month = date.toLocaleString("en-US", {
-    month: "long",
-  });
+  var month = date.toLocaleString("en-US", {month: "long",});
   var year = date.getFullYear();
   var fulldate = `${day} ${month} ${year}`;
   var newObj = {
-    id: notesArray.length + 1,
+    id: (notesArray.length + 1).toString(),
     date: fulldate,
     title: "Add Title",
     content: "Add Content",
   };
-
   notesArray.unshift(newObj);
-  renderDataInMiddle(notesArray);
   saveArraytoStorage();
+  console.log(newObj);
+  renderDataInMiddle(notesArray);
   renderInRight(newObj);
 }
 
@@ -390,40 +398,22 @@ selectedNote = notesArray[0];
 renderDataInMiddle(notesArray);
 renderInRight(selectedNote);
 
-// renderDataInContainer(currentNote);
-// function deleteWholeDiv(index) {
-//   var deleteButton = document.querySelectorAll(".delete-button");
-//   deleteButton.forEach(function (button) {
-//     button.addEventListener("click", function (event) {
-//       event.stopPropagation();
-//       const ids = button.getAttribute("data-id");
-//       const id = parseInt(ids); // Find the index of the note to be deleted
-
-//       const noteIndex = array.findIndex((note) => note.id === ids); // Remove the note from the array
-
-//       array.splice(noteIndex, 1);
-
-//       renderDataInMiddle(array); // If there are remaining notes, render the first note in the right div
-
-//       if (array.length > 0) {
-//         renderInRight(array, 0);
-//       } else {
-//         rightDiv.innerHTML = "";
-//       }
-//     });
-//   });
-// }
 function deleteNoteById(id) {
-  notesArray = notesArray.filter((note) => note.id !== id);
-  saveArraytoStorage();
-  renderDataInMiddle(notesArray);
-  if (selectedNote && selectedNote.id === id) {
-      // Find the next note to display in the right div
-      var index = notesArray.findIndex((note) => note.id !== id);
-      selectedNote = notesArray[index] || null;
   
-      // Render the selected note in the right div
+  const noteIndex = notesArray.findIndex((note) => note.id === id);
+  console.log(noteIndex);
+  if (noteIndex !== -1) {
+    notesArray.splice(noteIndex, 1);
+    saveArraytoStorage();
+    renderDataInMiddle(notesArray);
+    if (selectedNote && selectedNote.id === id) {
+      const newSelectedIndex = notesArray.findIndex((note) => note.id !== id);
+      console.log(newSelectedIndex);
+      selectedNote = notesArray[newSelectedIndex] || null;
+      console.log(selectedNote);
       renderInRight(selectedNote);
+    }
+  } else {
+    console.log( id, "not found");
   }
-  
 }

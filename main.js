@@ -47,19 +47,22 @@ containerDiv.setAttribute("id", "containerDiv");
 document.body.appendChild(containerDiv);
 
 function leftSideDiv() {
-  var div1 = document.createElement("div");
-  div1.setAttribute("id", "sideDiv");
-  containerDiv.appendChild(div1);
+  var leftDiv = document.createElement("div");
+  leftDiv.setAttribute("id", "sideDiv");
+  containerDiv.appendChild(leftDiv);
+
+
+
   var addDiv = document.createElement("button");
   addDiv.id = "plusButton";
   addDiv.innerHTML = `<i class="fa-solid fa-plus"></i>`;
-  div1.appendChild(addDiv);
+  leftDiv.appendChild(addDiv);
   addDiv.addEventListener("click", function (event) {
     creatAndAppendNewBox(event);
   });
 
   var penButton = document.createElement("button");
-  div1.appendChild(penButton);
+  leftDiv.appendChild(penButton);
   penButton.id = "penButton";
   penButton.innerHTML = `<i class="fa-solid fa-pencil"></i>`;
 
@@ -79,7 +82,12 @@ function leftSideDiv() {
       content: "",
       typeof: "drawing",
     };
-
+  
+    var shareButton = document.createElement('Button');
+    leftDiv.appendChild(shareButton);
+    shareButton.id="shareButton";
+    shareButton.innerHTML='hello';
+    // console.log(shareButton);
     notesArray.unshift(newObj);
 
     renderDataInMiddle(notesArray);
@@ -88,7 +96,7 @@ function leftSideDiv() {
   });
 
   var toDoButton = document.createElement("button");
-  div1.appendChild(toDoButton);
+  leftDiv.appendChild(toDoButton);
   toDoButton.id = "addressButton";
   toDoButton.innerHTML = `<i class="fa-solid fa-list"></i>`;
   toDoButton.addEventListener("click", function (event) {
@@ -112,13 +120,32 @@ function leftSideDiv() {
     renderInRight(newObj);
   });
 
-  var locationButton = document.createElement("button");
-  div1.appendChild(locationButton);
-  locationButton.id = "locationButton";
-  locationButton.innerHTML = `<i class="fa-solid fa-location-dot"></i>`;
-  locationButton.addEventListener("click", function () {
-    getLocationLatitudeAndLongitude();
-  });
+  var shareCodeButton = document.createElement("button");
+  leftDiv.appendChild(shareCodeButton);
+  shareCodeButton.id = "shareCodeButton";
+  // shareCodeButton.innerHTML = `<i class="fa-solid fa-location-dot"></i>`;
+  shareCodeButton.innerHTML = `<i class="fa-solid fa-square-share-nodes"></i>`;
+
+  shareCodeButton.addEventListener('click', async function() {
+    try {
+        if (navigator.share) {
+            await navigator.share({
+                title: notesArray.title,
+                text: notesArray.content,
+                url: window.location.href
+            });
+        } else {
+            console.log('Web Share API not supported.');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+    }
+});
+  // shareCodeButton.addEventListener("click", function () {
+  //   // getLocationLatitudeAndLongitude();
+  //   shareNotes();
+
+  // });
 }
 leftSideDiv();
 
@@ -143,7 +170,8 @@ function renderDataInMiddle(data) {
   var objMainDiv = document.getElementById("objMainDiv");
   objMainDiv.innerHTML = "";
 
-  var contentHtml = data.map(function (item, index) {
+  var contentHtml = data
+    .map(function (item, index) {
       if (item.typeof === "drawing") {
         return `<div class="smallBoxOfObject" data-id="${item.id}">
                       <button class='delete-button' data-id='${item.id}'>x</button>
@@ -153,7 +181,9 @@ function renderDataInMiddle(data) {
                       </div>`;
       } else {
         return `<div class="smallBoxOfObject" data-id="${item.id}">
-                      <button class='delete-button' data-id='${item.id}'>x</button>
+                      <button class='delete-button' data-id='${
+                        item.id
+                      }'>x</button>
                       <li>${item.date}</li>
                       <h3>${item.title}</h3>
                       <p>${item.content.slice(0, 350)}</p>
@@ -168,11 +198,10 @@ function renderDataInMiddle(data) {
   smallBoxOfObjects.forEach(function (box) {
     box.addEventListener("click", function () {
       const id = box.getAttribute("data-id");
-      const note = data.find(function (item) 
-      {
-        return item.id === id} 
-      );
-      console.log(note);
+      const note = data.find(function (item) {
+        return item.id === id;
+      });
+      
       renderInRight(note);
       saveArraytoStorage();
     });
@@ -182,7 +211,7 @@ function renderDataInMiddle(data) {
     button.addEventListener("click", function (event) {
       event.stopPropagation();
       const id = button.getAttribute("data-id");
-      
+
       deleteNoteById(id);
     });
   });
@@ -211,7 +240,7 @@ function renderInRight(note) {
   title.setAttribute("contentEditable", "true");
   contentDiv.appendChild(title);
   title.addEventListener("input", function (event) {
-    // contentEditable(event, note.id);
+    contentEditable(event, note.id);
     note.title = title.textContent;
     note.date = new Date().toLocaleString("en-US", {
       day: "numeric",
@@ -220,6 +249,7 @@ function renderInRight(note) {
     });
     saveArraytoStorage();
     renderDataInMiddle(notesArray);
+    highlightSelectedNote();
   });
 
   if (note.typeof === "drawing") {
@@ -273,14 +303,18 @@ function renderInRight(note) {
     contentDiv.appendChild(content);
     content.addEventListener("input", function (event) {
       contentEditable(event, note.id);
+      highlightSelectedNote();
     });
     var quill = new Quill(".edit-content", {
       theme: "snow",
     });
     quill.on("text-change", function () {
+
       note.content = quill.root.innerHTML;
+      updateNoteDate(note);
       saveArraytoStorage();
       renderDataInMiddle(notesArray);
+      highlightSelectedNote();
     });
   }
 
@@ -292,25 +326,24 @@ function renderInRight(note) {
       box.classList.remove("selected");
     }
   });
+  highlightSelectedNote();
 }
 
-
-
-function findNoteByID(id){
-  return notesArray.find(function(note){
-    return note.id ===id
-  })
+function findNoteByID(id) {
+  return notesArray.find(function (note) {
+    return note.id === id;
+  });
 }
 
 function contentEditable(event, id) {
   event.stopPropagation();
   var note = findNoteByID(id);
-  if(!note){
-    console.log('not found');
-    return
+  if (!note) {
+    console.log("not found");
+    return;
   }
   var editedElement = event.target;
-  
+
   note.date = new Date().toLocaleString("en-US", {
     day: "numeric",
     month: "long",
@@ -333,7 +366,7 @@ function contentEditable(event, id) {
 function creatAndAppendNewBox() {
   var date = new Date();
   var day = date.getDate();
-  var month = date.toLocaleString("en-US", {month: "long",});
+  var month = date.toLocaleString("en-US", { month: "long" });
   var year = date.getFullYear();
   var fulldate = `${day} ${month} ${year}`;
   var newObj = {
@@ -390,7 +423,6 @@ function sortArrayByDate() {
   notesArray.sort(function (a, b) {
     return new Date(b.date) - new Date(a.date);
   });
-  console.log("sorting_Done");
 }
 sortArrayByDate();
 renderDataInMiddle(notesArray);
@@ -399,7 +431,6 @@ renderDataInMiddle(notesArray);
 renderInRight(selectedNote);
 
 function deleteNoteById(id) {
-  
   const noteIndex = notesArray.findIndex((note) => note.id === id);
   console.log(noteIndex);
   if (noteIndex !== -1) {
@@ -414,6 +445,34 @@ function deleteNoteById(id) {
       renderInRight(selectedNote);
     }
   } else {
-    console.log( id, "not found");
+    console.log(id, "not found");
+  }
+}
+
+
+
+function highlightSelectedNote() {
+  var smallBoxOfObjects = document.querySelectorAll(".smallBoxOfObject");
+  smallBoxOfObjects.forEach(function (box) {
+    if (box.getAttribute("data-id") === selectedNote.id) {
+      box.classList.add("selected");
+    } else {
+      box.classList.remove("selected");
+    }
+  });
+}
+
+
+
+
+function updateNoteDate(note) {
+  note.date = new Date().toLocaleString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  var dateShowMore = document.querySelector(".date");
+  if (dateShowMore) {
+    dateShowMore.textContent = note.date;
   }
 }

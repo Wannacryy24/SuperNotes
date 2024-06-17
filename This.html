@@ -47,6 +47,7 @@ const student2 = new Student('tom');
 document.addEventListener('click',function(){
     console.log(this);
 })
+
 const button = document.getElementById('myButton');
 button.addEventListener('click', function() {
   console.log(this); // Here, this refers to the button element that was clicked
@@ -73,6 +74,242 @@ const call = {
 
 let newCall = call.anotherCaller;
 newCall();
+
+
+
+
+
+
+
+
+
+
+function arrayFilter(callback){
+    var array = [2,2-3,4,5,6];
+    callback(array);
+}
+arrayFilter(helloFilter);
+function helloFilter(array){
+    var newArray = array.filter((item)=> item%2==0)
+    console.log(newArray);
+}
+
+
+
+// const user = {
+//     fname:"Mayank",
+//     lname:"Verma",
+//     tags:[1,2,3,4,5],
+//     printTags(){
+//         this.tags.forEach(function(item){
+//             console.log(item,this.item );
+//         })
+//     }
+// }
+// console.log(user.printTags());
+const users = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 3, name: 'Charlie' }
+];
+var userFind = users.find(function(item){
+        return item.name =='Alice'
+})
+console.log(userFind);
+
+
+//===================================================================================================================================
+
+
+
+
+
+
+// context => this
+// this refers to the context in which a function is invoked. Its value depends on how a function is called, and it can change dynamically. 
+
+// Case 1: Global Context
+// Note: when 'this' is used outside of any function/method or object, it refers to the window(global) object.
+console.log(this);
+
+//case 2: function context
+// Note: when 'this' is used inside a regular function(not an arrow function), its value depends on how the function is called.
+function greet(){
+    console.log('function context: ', this);
+}
+greet();
+
+//case 3: Object method context
+//Note: when 'this' is used inside a method of an object, it refers to the object itself.
+const person = {
+    name: 'Gayle',
+    greet: function(){
+        console.log('Object method context: ',this, this.name);
+    }
+}
+person.greet();
+
+//case 4: Constructor function context:
+// Note: when 'this' is used inside a constructor function, it refers to the newly created instance of object.
+function Student(name){
+    this.name = name;
+    console.log(this);
+}
+
+const student1 = new Student('john');
+const student2 = new Student('tom');
+
+//Case 5: Event Handler Context
+//Note: when 'this' is used inside an event handler, it refers to the DOM element that triggered the event.
+document.addEventListener('click',function(){
+    console.log(this);
+})
+
+// this keyword cases:
+// this in global scope(not in a function)
+// invoking function with obj.methodName
+// invoking functio with new keyword
+// function being invoked on any event
+// none of above rule doesn't apply then this keyword will refer to 'window'
+
+//Example-1
+var person11 = {
+    firstName: "John",
+    lastName: "Doe",
+    id: 5566,
+    myFunction: function() {
+      return this;
+    }
+};
+console.log('Ex1==>',person11.myFunction());
+
+//Example-2
+var person22 = {
+    firstName: "John",
+    lastName: "Doe",
+    id: 5566,
+    myFunction: function() {
+      function inner() {
+        console.log('example2-->',this);
+      }
+      inner();
+    }
+};
+person22.myFunction();
+
+//Example-3
+function outer() {
+    console.log('outer-->',this);
+    function inner() {
+        console.log('inner --> ',this);
+        function inner1() {
+            console.log('inner1 --> ',this);
+            function inner2() {
+                console.log('inner2 --> ',this)
+            }
+            inner2();
+        }
+        inner1();
+    }
+    inner();
+}
+outer();
+
+// example-4
+var person33 = {
+    firstName: "John",
+    lastName: "Doe",
+    id: 5566,
+    innerPerson: {
+        firstName: 'innerJohn',
+        callMe: function() {
+            console.log('hey ',this.firstName,' ',this.lastName,' ',this);
+        }
+    }
+};
+person33.innerPerson.callMe();
+
+//example-5
+setTimeout(function(){
+    // console.log(this);
+});
+
+// example-6
+const obj11 = {
+    message: 'Hi..guys',
+    sayHi: function() {
+        const message = 'hello folks..';
+        console.log('example-6 ->',this.message, this);
+    }
+}
+obj11.sayHi();
+
+//example-7
+// setTimeout(obj11.sayHi,1000);
+
+//example-8
+var noOfItems = 10;
+function getItemsLength() {
+    console.log('example-8 => ',this.noOfItems,this);
+}
+const obj22 = {
+    noOfItems: 20,
+    callMe: function(callback) {
+        callback();
+    },
+    callYou: function(){
+        console.log(this);
+    }
+}
+obj22.callMe(getItemsLength);
+obj22.callMe(obj22.callYou);
+
+//call, apply & bind => all of these are function's method means when you are going to create any function all of these methods will exists in that function.
+//all of these are function's methods and can use to invoke any function with overrided context
+function sayMorning(p1,p2,p3){
+    console.log(this,'params: ',p1,p2,p3);
+    console.log(Good Morning..${p1},${p2},${p3} and myself ${this.me});
+}
+sayMorning('Bhim','Arjun','Yudhishtir');
+
+//call is the function's method for overriding the context of any function and can pass the params as comma separated
+//function.call(overridedContextObject,params,params2)
+sayMorning.call({me:'CALL'},'Bhim','Arjun','Yudhishtir')
+
+//Difference between call and apply is only in terms of passing params, call accepts params as comma separated but with apply params must be passed as an array.
+sayMorning.apply({me:'APPLY'},['Bhim','Arjun','Yudhishtir'])
+
+//bind method returns the same method with overrided context but never invokes it.
+const sayMorningWithOverridedContext = sayMorning.bind({me:'CALL'},'Bhim','Arjun','Yudhishtir')
+console.log(sayMorningWithOverridedContext);
+sayMorningWithOverridedContext();
+
+//Arrow function
+//arrow function always bind value of this lexically and call, apply & bind doesn't work with arrow function and can not be initialized like constructor function
+const arrowFn = () => {
+    console.log('in arrow : ',this);
+}
+arrowFn();
+//const arrowInst = new arrowFn() //will throw an error: arrow function is not a constructor
+
+function nonArrowFn(name){
+    this.name = name;
+    console.log('-----------------------------------------');
+    console.log(`IN NON ARROW FN: `,this);
+    const arrowFn = () => {
+        console.log('in arrow fn : ',this);
+    }
+    arrowFn();
+}
+nonArrowFn('glbalName');
+const nonArrowInst = new nonArrowFn('instanceName');
+const arrowObj = {
+    name: 'arrowObject',
+    nonArrowFn: nonArrowFn
+}
+arrowObj.nonArrowFn('objName');
+document.addEventListener('click', nonArrowFn)
+
     </script>
 </body>
 </html>
